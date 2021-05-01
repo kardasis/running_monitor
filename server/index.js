@@ -15,11 +15,22 @@ port.on("open", () => {
 
 wss.on('connection', function connection(ws) {
   console.log('connected to websocket')
-  parser.on('data', data =>{
+
+  ws.on('message', function incoming(data) {
+    if (data.message === 'start') {
+      console.log('starting run')
+      ws.send({message: 'starting run'})
+    } else if (data.message === 'stop') {
+      console.log('stopping run') 
+      ws.send({message: 'stopping run'})
+    } 
+  })
+
+  parser.on('data', data => {
     if (!data.includes('buffer filling')) {
       speeds.push(data)
-      console.log(speeds.length, data)
-      ws.send(`${data}: ${speeds.length}`);
+      ws.send(`${data}: ${speeds.length}`)
     }
-  });
+  })
 })
+

@@ -21,9 +21,10 @@ void on_sensor_change()
 {
   sensor_state = digitalRead(HALL_EFFECT_SENSOR_INPUT_PIN); // read the input pin
   digitalWrite(LED_BUILTIN, sensor_state);
-  if (sensor_state == HIGH && (millis() - rising_edges.first() > 2))
+  long timestamp = millis()
+  if (sensor_state == HIGH && (timestamp - rising_edges.first() > 2))
   {
-    if (rising_edges.unshift(millis())) // push timestamp to circular buffer
+    if (rising_edges.unshift(timestamp)) 
     {
       Serial.println("buffer filling");
     }
@@ -32,19 +33,16 @@ void on_sensor_change()
       int delta_time_ms = rising_edges.first() - rising_edges.last();
       float cycles_per_second = 1000.0 * (TIMESTAMP_ARRAY_SIZE - 1) / delta_time_ms;
       float mph = cycles_per_second/2.933333;
+      float incline = 0.0;
 
-      for (int i = 0 ; i < TIMESTAMP_ARRAY_SIZE ; i++ ) {
-        // Serial.print(rising_edges[i] - rising_edges.last());
-        // Serial.print(", ");
-      }
-      // Serial.println("---");
-      // Serial.println(delta_time_ms);
-      Serial.println(mph);
+      Serial.print("{\"millis\": ");
+      Serial.print(timestamp);
+      Serial.print(", \"speed\": ");
+      Serial.print(mph);
+      Serial.print(", \"incline\": ");
+      Serial.print(incline);
+      Serial.println("}");
     }
-  }
-  else
-  {
-    // Serial.println("falling edge");
   }
 }
 
