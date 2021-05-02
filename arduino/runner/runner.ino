@@ -21,7 +21,7 @@ void on_sensor_change()
 {
   sensor_state = digitalRead(HALL_EFFECT_SENSOR_INPUT_PIN); // read the input pin
   digitalWrite(LED_BUILTIN, sensor_state);
-  long timestamp = millis()
+  long timestamp = millis();
   if (sensor_state == HIGH && (timestamp - rising_edges.first() > 2))
   {
     if (rising_edges.unshift(timestamp)) 
