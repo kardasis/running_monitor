@@ -1,3 +1,5 @@
+const awsWrapper = require('./aws')
+
 const SerialPort = require('serialport')
 const Readline = require('@serialport/parser-readline')
 
@@ -21,9 +23,10 @@ wss.on('connection', function connection(ws) {
       console.log('starting run')
       ws.send({message: 'starting run'})
     } else if (data.message === 'stop') {
-      console.log('stopping run') 
+      console.log('stopping run')
       ws.send({message: 'stopping run'})
-    } 
+      awsWrapper.putToS3(speeds)
+    }
   })
 
   parser.on('data', data => {

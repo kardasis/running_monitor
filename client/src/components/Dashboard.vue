@@ -3,13 +3,24 @@
     <div class="current-mph cell">
       <h1>5.65<span class="units">mph</span></h1>
     </div>
+  </div>
+  <div class="row">
     <div class="elapsed-time cell">
       <h1>3:43</h1>
     </div>
-  </div>
-  <div class="row">
     <div class="distance cell">
       <h1>3.998<span class="units">mi</span></h1>
+    </div>
+  </div>
+  <div class="row">
+    <div class="pace cell">
+      <h1>9:34<span class="units">min/mi</span></h1>
+    </div>
+    <div class="average-speed cell">
+      <h1>3.998<span class="units">mi</span></h1>
+    </div>
+    <div class="average-pace cell">
+      <h1>10:43<span class="units">min/mi</span></h1>
     </div>
   </div>
   <button class="start" v-if="!isRunning" v-on:click="start">Start</button>
@@ -34,12 +45,12 @@ export default {
   methods: {
     stop: function () {
       console.log("Sending stop");
-      this.connection.send("stop");
+      this.connection.send({message: 'stop'});
       this.state = "stopped";
     },
     start: function () {
       console.log("Sending start");
-      this.connection.send("start");
+      this.connection.send({message: 'start'});
       this.state = "running";
     },
   },
@@ -90,6 +101,7 @@ div {
   border-width: 1px;
   border-color: darkgrey;
   &.current-mph > h1 {
+      font-size: 150px;
     color: green;
   }
   &.elapsed-time > h1 {
@@ -109,7 +121,7 @@ h1 {
   display: flex;
   flex-direction: column;
 }
-    .units {
-      font-size: 50%;
-    }
+.units {
+  font-size: 30%;
+}
 </style>
