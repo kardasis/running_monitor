@@ -45,21 +45,22 @@ export default {
   methods: {
     stop: function () {
       console.log("Sending stop");
-      this.connection.send({message: 'stop'});
+      this.connection.send(JSON.stringify({message: 'stop'}));
       this.state = "stopped";
     },
     start: function () {
       console.log("Sending start");
-      this.connection.send({message: 'start'});
+      this.connection.send(JSON.stringify({message: 'start'}));
       this.state = "running";
     },
   },
   created: function () {
     console.log("Starting connection to WebSocket Server");
-    this.connection = new WebSocket("ws://192.168.86.31:8080");
+    this.connection = new WebSocket("ws://localhost:8081");
+    // this.connection = new WebSocket("ws://192.168.86.31:8080");
 
     this.connection.onmessage = function (event) {
-      console.log(event);
+      console.log(event.data);
     };
 
     this.connection.onopen = function () {

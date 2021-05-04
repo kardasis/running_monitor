@@ -24,9 +24,9 @@ void on_sensor_change()
   long timestamp = millis();
   if (sensor_state == HIGH && (timestamp - rising_edges.first() > 2))
   {
-    if (rising_edges.unshift(timestamp)) 
+    if (rising_edges.unshift(timestamp))
     {
-      Serial.println("buffer filling");
+      // Serial.println('{"message": "buffer filling"}');
     }
     else
     {
