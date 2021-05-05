@@ -1,5 +1,4 @@
-require('dotenv').config()
-
+import dotenv  from "dotenv"
 import { putToS3 } from './aws'
 import SerialPort from 'serialport'
 import WebSocket from 'ws'

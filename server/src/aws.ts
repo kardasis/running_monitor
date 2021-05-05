@@ -1,5 +1,7 @@
+import dotenv  from "dotenv"
+dotenv.config()
+
 import AWS from 'aws-sdk'
-// import S3 from 'aws-sdk/clients/s3'
 
 
 export async function putToS3(runName: string, runData: any[], bucketName: string) {
