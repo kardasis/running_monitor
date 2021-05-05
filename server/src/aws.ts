@@ -2,7 +2,7 @@ import AWS from 'aws-sdk'
 // import S3 from 'aws-sdk/clients/s3'
 
 
-export async function putToS3(runName: string, runData, bucketName: string, callback) {
+export async function putToS3(runName: string, runData: any[], bucketName: string) {
     const s3 = new AWS.S3({
         accessKeyId: process.env.AWS_ACCESS_KEY,
         secretAccessKey: process.env.AWS_SECRET
@@ -16,11 +16,9 @@ export async function putToS3(runName: string, runData, bucketName: string, call
     // await s3.upload(params).promise()
 
     s3.upload(params, function (err, data) {
-        console.log('updload attempt complete')
         if (err) {
             throw err;
         }
         console.log(`File uploaded successfully. ${data.Location}`);
-        callback()
     })
 }

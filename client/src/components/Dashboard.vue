@@ -1,30 +1,32 @@
-<template class="dash">
-  <div class="row">
-    <div class="current-mph cell">
-      <h1>5.65<span class="units">mph</span></h1>
+<template>
+  <div class="dashboard">
+    <div class="row">
+      <div class="current-mph cell">
+        <h1>{{speed}}<span class="units">mph</span></h1>
+      </div>
     </div>
+    <div class="row">
+      <div class="elapsed-time cell">
+        <h1>3:43</h1>
+      </div>
+      <div class="distance cell">
+        <h1>3.998<span class="units">mi</span></h1>
+      </div>
+    </div>
+    <div class="row">
+      <div class="pace cell">
+        <h1>9:34<span class="units">min/mi</span></h1>
+      </div>
+      <div class="average-speed cell">
+        <h1>3.998<span class="units">mi</span></h1>
+      </div>
+      <div class="average-pace cell">
+        <h1>10:43<span class="units">min/mi</span></h1>
+      </div>
+    </div>
+    <button class="start" v-if="!isRunning" v-on:click="start">Start</button>
+    <button class="stop" v-if="isRunning" v-on:click="stop">Stop</button>
   </div>
-  <div class="row">
-    <div class="elapsed-time cell">
-      <h1>3:43</h1>
-    </div>
-    <div class="distance cell">
-      <h1>3.998<span class="units">mi</span></h1>
-    </div>
-  </div>
-  <div class="row">
-    <div class="pace cell">
-      <h1>9:34<span class="units">min/mi</span></h1>
-    </div>
-    <div class="average-speed cell">
-      <h1>3.998<span class="units">mi</span></h1>
-    </div>
-    <div class="average-pace cell">
-      <h1>10:43<span class="units">min/mi</span></h1>
-    </div>
-  </div>
-  <button class="start" v-if="!isRunning" v-on:click="start">Start</button>
-  <button class="stop" v-if="isRunning" v-on:click="stop">Stop</button>
 </template>
 
 <script>
@@ -33,11 +35,15 @@ export default {
   props: {},
   data: function () {
     return {
+      eventData: {},
       state: "stopped",
       connection: null,
     };
   },
   computed: {
+    speed: function () {
+      return this.eventData.speed
+    },
     isRunning: function () {
       return this.state === "running";
     },
@@ -45,22 +51,23 @@ export default {
   methods: {
     stop: function () {
       console.log("Sending stop");
-      this.connection.send(JSON.stringify({message: 'stop'}));
+      this.connection.send(JSON.stringify({ message: "stop" }));
       this.state = "stopped";
     },
     start: function () {
       console.log("Sending start");
-      this.connection.send(JSON.stringify({message: 'start'}));
+      this.connection.send(JSON.stringify({ message: "start" }));
       this.state = "running";
     },
   },
   created: function () {
     console.log("Starting connection to WebSocket Server");
-    this.connection = new WebSocket("ws://localhost:8081");
-    // this.connection = new WebSocket("ws://192.168.86.31:8080");
+    // this.connection = new WebSocket("ws://localhost:8081");
+    this.connection = new WebSocket("ws://192.168.86.31:8081");
 
     this.connection.onmessage = function (event) {
-      console.log(event.data);
+      this.eventData = event.data
+      console.log(event.data)
     };
 
     this.connection.onopen = function () {
@@ -102,7 +109,7 @@ div {
   border-width: 1px;
   border-color: darkgrey;
   &.current-mph > h1 {
-      font-size: 150px;
+    font-size: 150px;
     color: green;
   }
   &.elapsed-time > h1 {
