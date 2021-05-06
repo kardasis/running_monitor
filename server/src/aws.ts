@@ -4,7 +4,7 @@ dotenv.config()
 import AWS from 'aws-sdk'
 
 
-export async function putToS3(runName: string, runData: any[], bucketName: string) {
+export function putToS3(runName: string, runData: any[], bucketName: string) {
     const s3 = new AWS.S3({
         accessKeyId: process.env.AWS_ACCESS_KEY,
         secretAccessKey: process.env.AWS_SECRET

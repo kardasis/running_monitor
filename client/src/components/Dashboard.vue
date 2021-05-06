@@ -2,7 +2,7 @@
   <div class="dashboard">
     <div class="row">
       <div class="current-mph cell">
-        <h1>{{speed}}<span class="units">mph</span></h1>
+        <h1>{{ speed }}<span class="units">mph</span></h1>
       </div>
     </div>
     <div class="row">
@@ -35,7 +35,11 @@ export default {
   props: {},
   data: function () {
     return {
-      eventData: {},
+      eventData: {
+        speed: ' - ',
+        millis: '12345',
+        incline: ' - '
+      },
       state: "stopped",
       connection: null,
     };
@@ -62,11 +66,11 @@ export default {
   },
   created: function () {
     console.log("Starting connection to WebSocket Server");
-    // this.connection = new WebSocket("ws://localhost:8081");
-    this.connection = new WebSocket("ws://192.168.86.31:8081");
+    this.connection = new WebSocket("ws://localhost:8081");
+    // this.connection = new WebSocket("ws://192.168.86.31:8081");
 
-    this.connection.onmessage = function (event) {
-      this.eventData = event.data
+    this.connection.onmessage =  (event) => {
+      this.eventData = JSON.parse(event.data)
       console.log(event.data)
     };
 
@@ -125,7 +129,7 @@ h1 {
   font-size: 100px;
   color: blue;
 }
-.dash {
+.dashboard {
   display: flex;
   flex-direction: column;
 }
