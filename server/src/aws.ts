@@ -15,7 +15,6 @@ export function putToS3(runName: string, runData: any[], bucketName: string) {
         Key: runName,
         Body: JSON.stringify(runData)
     };
-    // await s3.upload(params).promise()
 
     s3.upload(params, function (err, data) {
         if (err) {

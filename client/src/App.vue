@@ -2,18 +2,19 @@
   <Dashboard/>
 </template>
 
-<script>
-import Dashboard from './components/Dashboard.vue'
+<script lang="ts">
+import { Options, Vue } from 'vue-class-component';
+import Dashboard from './components/Dashboard.vue';
 
-export default {
-  name: 'App',
+@Options({
   components: {
-    Dashboard
-  }
-}
+    Dashboard,
+  },
+})
+export default class App extends Vue {}
 </script>
 
-<style>
+<style lang="scss">
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;

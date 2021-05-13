@@ -14,12 +14,14 @@
   "dependencies": {
     "aws-sdk": "^2.897.0",
     "dotenv": "^8.2.0",
-    "moment": "^2.29.1",
+    "keypress": "^0.2.1",
+    "luxon": "^1.26.0",
     "serialport": "^9.0.7",
     "ws": "^7.4.5"
   },
   "devDependencies": {
     "@types/jest": "^26.0.23",
+    "@types/luxon": "^1.26.5",
     "@types/serialport": "^8.0.1",
     "@types/ws": "^7.4.2",
     "aws-sdk-mock": "^5.1.0",

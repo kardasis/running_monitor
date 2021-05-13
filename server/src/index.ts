@@ -1,13 +1,37 @@
-import dotenv from "dotenv"
-import { putToS3 } from './aws'
+import keypress from 'keypress'
 import SerialPort from 'serialport'
 import WebSocket from 'ws'
-import moment from 'moment'
+import { Run } from './run'
+import { TICKS_PER_MILE, SECONDS_PER_HOUR } from './constants'
 
-const Readline = SerialPort.parsers.Readline
+let fake_speed = 1.0 // mph
+
+type ClientData = {
+  timestamp: number
+  tickCount: number
+  speed: number
+}
+
+let currentRun: Run
+let sendingData = false
+
+keypress(process.stdin);
+process.stdin.on('keypress', function (ch, key) {
+  if (key && key.name === "c" && key.ctrl) {
+    console.log("bye bye");
+    process.exit();
+  } else if (key && key.name == 'up') {
+    fake_speed += .1
+  } else if (key && key.name == 'down') {
+    fake_speed -= .1
+  }
+  console.log(`fake_speed: ${fake_speed}`)
+});
+
+process.stdin.setRawMode(true);
+process.stdin.resume();
 
 const wss = new WebSocket.Server({ port: 8081 });
-const mock = process.argv.length > 2 && process.argv[2] === 'mock'
 
 SerialPort.list().then((list) => {
   let port: SerialPort
@@ -17,46 +41,48 @@ SerialPort.list().then((list) => {
     port.on("open", () => {
       console.log('connected to arduino')
     })
-    parser = port.pipe(new Readline({ delimiter: '\n' }))
+    parser = port.pipe(new SerialPort.parsers.Readline({ delimiter: '\n' }))
   } else {
     console.log('failed to connect to arduino')
   }
-  let speeds = []
-  let runName = ""
 
   wss.on('connection', function connection(ws): void {
     console.log('connected to websocket')
-
     ws.on('message', function incoming(data) {
       const message = JSON.parse(data as string)
       if (message.message === 'start') {
         console.log('starting run')
-        ws.send(JSON.stringify({ message: 'starting run' }))
-        runName = moment().format();
-        speeds = []
+        currentRun = new Run(ws)
       } else if (message.message === 'stop') {
         console.log('stopping run')
         ws.send(JSON.stringify({ message: 'stopping run' }))
-        putToS3(runName, speeds, process.env.AWS_BUCKET_NAME)
+        currentRun.finish(!!parser)
       }
     })
 
-console.log(parser)
     if (parser) {
       parser.on('data', data => {
-        if (!data.includes('buffer filling')) {
-          speeds.push(JSON.parse(data))
-        ws.send(data)
+        const jsonData = JSON.parse(data)
+        if (currentRun && jsonData.data) {
+          currentRun.addDataPoint(jsonData)
         }
       })
     } else {
-      setInterval(() => {
-        const data = '{"millis": 12345, "speed": 1.34, "incline": 0.0}'
-        console.log(`sending fake data: ${data}`)
-        speeds.push(JSON.parse(data))
-        ws.send(data)
-      }, 500)
+      if (!sendingData) {
+        sendFakeData()
+        sendingData = true
+      }
     }
   })
 })
+
+function sendFakeData() {
+  const tickTime = 1000 * SECONDS_PER_HOUR / fake_speed / TICKS_PER_MILE
+  setTimeout(() => {
+    if (currentRun) {
+      currentRun.sendFakeData(fake_speed)
+    }
+    sendFakeData()
+  }, tickTime)
+}
 
