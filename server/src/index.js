@@ -1,5 +1,6 @@
 const keypress = require('keypress')
-const  SerialPort= require('serialport')
+const SerialPort= require('serialport')
+const WebSocket= require('ws')
 const {putToS3} = require('./aws')
 const { TICKS_PER_MILE, SECONDS_PER_HOUR } = require('./constants')
 const dotenv = require('dotenv')
@@ -7,7 +8,7 @@ const dotenv = require('dotenv')
 dotenv.config()
 
 let state = 'standby'
-let ticks
+let ticks = []
 let startTime
 let lastTickTime
 
@@ -69,7 +70,7 @@ function uploadRun() {
     process.env.BUCKET_NAME)
 }
 
-var intervalId = setInterval(activityCheck, 1000);
+const intervalId = setInterval(activityCheck, 1000);
 function activityCheck() {
   if (state == 'running') {
     const now = Date.now()
@@ -79,30 +80,32 @@ function activityCheck() {
   }
 }
 
+function wsHandler(ws) {
+  if (state == 'running') {
+    ws.send(JSON.stringify({ 
+      type: 'dataPoint',
+      tickCount: ticks.length,
+      speed: 1.0
+    }))
+  }
+}
 
-// const wss = new WebSocket.Server({ port: 8081 });
-// wss.on('connection', function connection(ws): void {
-//   console.log('connected to websocket')
-//   ws.on('message', function incoming(data) {
-//     const message = JSON.parse(data as string)
-//     if (message.message === 'start') {
-//       console.log('starting run')
-//       currentRun = new Run(ws)
-//     } else if (message.message === 'stop') {
-//       console.log('stopping run')
-//       ws.send(JSON.stringify({ message: 'stopping run' }))
-//       currentRun.finish(!!parser)
-//     }
-//   })
+const wss = new WebSocket.Server({ port: 8081 });
+wss.on('connection', function connection(ws) {
+  console.log('connected to websocket')
 
-//   if (parser) {
-//     parser.on('data', data => {
-//       const jsonData = JSON.parse(data)
-//       if (currentRun && jsonData.data) {
-//         currentRun.addDataPoint(jsonData)
-//       }
-//     })
-//   }
-// })
+  const intervalId = setInterval(() => {wsHandler(ws)}, 1000);
+
+  ws.on('message', function incoming(data) {
+    const message = JSON.parse(data)
+    if (message.message === 'start') {
+      console.log('starting run')
+    } else if (message.message === 'stop') {
+      console.log('stopping run')
+      ws.send(JSON.stringify({ message: 'stopping run' }))
+      currentRun.finish(!!parser)
+    }
+  })
+})
 
 
