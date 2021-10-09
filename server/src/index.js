@@ -18,10 +18,10 @@ process.stdin.on('keypress', function (ch, key) {
     console.log("bye bye");
     process.exit();
   } else if (key && key.name == 'up') {
-  putToS3(
-    'run-' + Date.now() + '.json', 
-    {ticks: [100, 420, 732], startTime: Date.now()}, 
-    'ak-sandbox')
+    putToS3(
+      'run-' + Date.now() + '.json', 
+      {ticks: [100, 420, 732], startTime: Date.now()}, 
+      'ak-sandbox')
   } else if (key && key.name == 'down') {
     // fake_speed -= .1
   }
@@ -63,11 +63,13 @@ function endRun() {
 }
 
 function uploadRun() {
-  console.log(process.env.BUCKET_NAME)
-  putToS3(
-    'run-' + startTime + '.json', 
-    {ticks, startTime}, 
-    process.env.BUCKET_NAME)
+  console.log('putting to bucket: ' + process.env.BUCKET_NAME)
+  if (ticks.length > 10) {
+    putToS3(
+      'run-' + startTime + '.json', 
+      {ticks, startTime}, 
+      process.env.BUCKET_NAME)
+  }
 }
 
 const intervalId = setInterval(activityCheck, 1000);
