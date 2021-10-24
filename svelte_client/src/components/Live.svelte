@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import LiveChart from './LiveChart.svelte'
   import LiveSpeed from './LiveSpeed.svelte'
-  import LiveGhost from './LiveGhost.svelte'
+  import LiveGhostList from './LiveGhostList.svelte'
 
 
   let connection
@@ -60,7 +60,7 @@
       </div>
     </div>
   </div>
-  <LiveGhost {runInfo} />
+  <LiveGhostList {runInfo} />
   <LiveChart {runInfo} />
 </div>
 
