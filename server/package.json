@@ -11,9 +11,12 @@
   "license": "ISC",
   "dependencies": {
     "aws-sdk": "^2.897.0",
+    "cors": "^2.8.5",
     "dotenv": "^8.2.0",
+    "express": "^4.17.1",
     "keypress": "^0.2.1",
     "luxon": "^1.26.0",
+    "pug": "^3.0.2",
     "serialport": "^9.0.7",
     "ws": "^7.4.5"
   },

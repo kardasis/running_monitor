@@ -1,31 +1,72 @@
+const { TICKS_PER_MILE, MILLIS_PER_HOUR } = require('./constants')
 const keypress = require('keypress')
 const SerialPort= require('serialport')
 const WebSocket= require('ws')
-const {putToS3} = require('./aws')
-const { TICKS_PER_MILE, SECONDS_PER_HOUR } = require('./constants')
+const {putToS3, fetchRuns, fetchRun} = require('./aws')
 const dotenv = require('dotenv')
+const { Faker } = require('./faker')
+
+const { processRun } = require('./processRun')
+const express = require('express')
+const cors = require('cors')
+
+const SPEED_SMOOTHING = .8
+const port = 3030
+const app = express()
+
+app.use(cors())
+
+app.get('/run/:name', async (req, res) => {
+  const rawRun = JSON.parse(await fetchRun(req.params.name))
+  res.json(processRun(rawRun))
+})
+
+app.get('/runs', async (req, res) => {
+  const runs = await fetchRuns()
+  res.json(runs.sort().map(r => {
+    return r.Key.split('.')[0]
+  }))
+})
+
+app.listen(port, () => {
+  console.log(`Example app listening at http://localhost:${port}`)
+})
+
 
 dotenv.config()
 
+let speed = 0
 let state = 'standby'
 let ticks = []
+let runInfo = []
 let startTime
 let lastTickTime
+let faker
+let websocket
 
 keypress(process.stdin);
 process.stdin.on('keypress', function (ch, key) {
   if (key && key.name === "c" && key.ctrl) {
     console.log("bye bye");
     process.exit();
-  } else if (key && key.name == 'up') {
-    putToS3(
-      'run-' + Date.now() + '.json', 
-      {ticks: [100, 420, 732], startTime: Date.now()}, 
-      'ak-sandbox')
-  } else if (key && key.name == 'down') {
-    // fake_speed -= .1
-  }
-});
+  } else if (key && key.name == 'k') {
+    if (faker) {
+      faker.speedUp()
+    }
+  } else if (key && key.name == 'j') {
+    if (faker) {
+      faker.speedDown()
+    }
+  } else if (key && key.name == 's') {
+    if (faker) {
+      faker.start()
+    }
+  } else if (key && key.name == 'e') {
+    if (faker) {
+      faker.stop()
+    }
+  } 
+})
 
 process.stdin.setRawMode(true);
 process.stdin.resume();
@@ -39,20 +80,28 @@ SerialPort.list().then((list) => {
       console.log('connected to arduino')
     })
     parser = port.pipe(new SerialPort.parsers.Readline({ delimiter: '\n' }))
+    parser.on('data', handleData)
   } else {
-    console.log('failed to connect to arduino')
+    console.log('failed to connect to arduino. Fake data time')
+    faker = new Faker(handleData, 1.0)
   }
-  parser.on('data', handleData)
 })
 
-function handleData(data) {
-  console.log(data, state)
+function handleData(millis) {
   if (state == 'standby') {
     state = 'running'
     ticks = []
+    runInfo = []
     startTime = Date.now()
   } 
-  ticks.push(data)
+  ticks.push(millis)
+
+  if (ticks.length <= 1) {
+    speed = 0
+  } else {
+    const immediateSpeed = MILLIS_PER_HOUR / (ticks[ticks.length - 1] - ticks[ticks.length - 2]) / TICKS_PER_MILE
+    speed = SPEED_SMOOTHING * speed + (1 - SPEED_SMOOTHING) * immediateSpeed
+  }
   lastTickTime = Date.now()
 }
 
@@ -60,6 +109,12 @@ function endRun() {
   console.log('finalizing run')
   uploadRun()
   state = 'standby'
+  if (websocket) {
+    websocket.send(JSON.stringify({ 
+      type: 'message',
+      message: 'end'
+    }))
+  }
 }
 
 function uploadRun() {
@@ -76,18 +131,23 @@ const intervalId = setInterval(activityCheck, 1000);
 function activityCheck() {
   if (state == 'running') {
     const now = Date.now()
-    if (now-lastTickTime > 2000) {
+    const timeoutTime = faker ? 1000 : 30000
+    if (now-lastTickTime > timeoutTime) {
       endRun()
     }
   }
 }
 
 function wsHandler(ws) {
+  runInfo.push({
+    distance: ticks.length / TICKS_PER_MILE,
+    time: ticks[ticks.length - 1]/1000,
+    speed
+  })
   if (state == 'running') {
     ws.send(JSON.stringify({ 
       type: 'dataPoint',
-      tickCount: ticks.length,
-      speed: 1.0
+      ...runInfo[runInfo.length - 1],
     }))
   }
 }
@@ -95,8 +155,10 @@ function wsHandler(ws) {
 const wss = new WebSocket.Server({ port: 8081 });
 wss.on('connection', function connection(ws) {
   console.log('connected to websocket')
-
-  const intervalId = setInterval(() => {wsHandler(ws)}, 1000);
+  if (ticks.length > 0) {
+    ws.send(JSON.stringify({ type: 'milestone', runInfo }))
+  }
+  setInterval(() => {wsHandler(ws)}, 1000);
 
   ws.on('message', function incoming(data) {
     const message = JSON.parse(data)
@@ -105,7 +167,6 @@ wss.on('connection', function connection(ws) {
     } else if (message.message === 'stop') {
       console.log('stopping run')
       ws.send(JSON.stringify({ message: 'stopping run' }))
-      currentRun.finish(!!parser)
     }
   })
 })
