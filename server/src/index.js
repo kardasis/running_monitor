@@ -132,7 +132,7 @@ function activityCheck() {
   if (state == 'running') {
     const now = Date.now()
     const timeoutTime = faker ? 1000 : 30000
-    if (now-lastTickTime > timeoutTime) {
+    if (now - lastTickTime > timeoutTime) {
       endRun()
     }
   }
@@ -155,20 +155,11 @@ function wsHandler(ws) {
 const wss = new WebSocket.Server({ port: 8081 });
 wss.on('connection', function connection(ws) {
   console.log('connected to websocket')
-  if (ticks.length > 0) {
+  websocket = ws
+  if (state === 'running') {
     ws.send(JSON.stringify({ type: 'milestone', runInfo }))
   }
   setInterval(() => {wsHandler(ws)}, 1000);
-
-  ws.on('message', function incoming(data) {
-    const message = JSON.parse(data)
-    if (message.message === 'start') {
-      console.log('starting run')
-    } else if (message.message === 'stop') {
-      console.log('stopping run')
-      ws.send(JSON.stringify({ message: 'stopping run' }))
-    }
-  })
 })
 
 

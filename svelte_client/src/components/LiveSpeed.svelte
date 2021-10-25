@@ -2,15 +2,15 @@
   import { afterUpdate } from 'svelte'
   export let eventData
   export let runInfo
-  let averageSpeed
+  let averageSpeed = 0
 
   afterUpdate(() => {
       if (runInfo && runInfo.length > 0) {
           averageSpeed = runInfo[runInfo.length - 1].distance/runInfo[runInfo.length - 1].time 
           averageSpeed = (averageSpeed * 3600).toFixed(4)
         } else {
-          averageSpeed = 0
-        }
+            averageSpeed = 0
+          }
     })
 </script>
 
@@ -18,7 +18,7 @@
   <div class="current-speed datum">
     <div class="label"> Speed: </div>
     <div class="content">
-      <span class="content large"> {eventData?.speed.toFixed(2)} </span>mph
+      <span class="content large"> {eventData?.speed.toFixed(2) || '0'} </span>mph
     </div>
   </div>
   <div class="average-speed datum">

@@ -6,6 +6,7 @@
 
 
   let connection
+  let state = 'standby'
   let eventData
   let runInfo = []
   $: speed = eventData?.speed
@@ -22,17 +23,20 @@
 
 
   onMount(async () => {
-      /* connection = new WebSocket("ws://192.168.86.31:8081"); */
-      connection = new WebSocket("ws://localhost:8081");
+      connection = new WebSocket(process.env.WS_URL);
 
       connection.onmessage = (event) => {
           const data = JSON.parse(event.data);
           if (data.type === "dataPoint") {
+              state = 'running'
               eventData = data
               runInfo = [...runInfo, data]
-            } else if (data.type === 'milestone') {
-                runInfo = data.runInfo
-              }
+            } else if (data.type === 'message' && data.message === 'end') {
+                state = 'standby'
+              } else if (data.type === 'milestone') {
+                  state = 'running'
+                  runInfo = data.runInfo
+                }
         }
       connection.onopen = function () {
           console.log("Connected to server");
@@ -40,7 +44,7 @@
     })
 </script>
 
-<div class="live-container">
+<div class="live-container {state}">
   <div class="data-container">
     <LiveSpeed {eventData} {runInfo} />
     <div class="distance-info">
@@ -81,7 +85,12 @@
     }
   }
   .live-container {
-    background-color: #eee;
+    &.running {
+      background-color: green;
+    }
+    &.standby {
+      background-color: red;
+    }
   }
   .datum {
     display: flex;
