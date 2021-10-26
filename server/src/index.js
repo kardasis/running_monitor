@@ -29,7 +29,7 @@ app.get('/runs', async (req, res) => {
 })
 
 app.listen(port, () => {
-  console.log(`Example app listening at http://localhost:${port}`)
+  console.log(`Express listening on port ${port}`)
 })
 
 
@@ -88,6 +88,7 @@ SerialPort.list().then((list) => {
 })
 
 function handleData(millis) {
+  if (isNaN(parseInt(millis))) return
   if (state == 'standby') {
     state = 'running'
     ticks = []
@@ -96,7 +97,7 @@ function handleData(millis) {
   } 
   ticks.push(millis)
 
-  if (ticks.length <= 1) {
+  if ((ticks.length <= 1) || (ticks[ticks.length - 1] - ticks[ticks.length - 2] == 0)) {
     speed = 0
   } else {
     const immediateSpeed = MILLIS_PER_HOUR / (ticks[ticks.length - 1] - ticks[ticks.length - 2]) / TICKS_PER_MILE
