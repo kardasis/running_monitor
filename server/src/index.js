@@ -142,7 +142,7 @@ function activityCheck() {
 function wsHandler(ws) {
   runInfo.push({
     distance: ticks.length / TICKS_PER_MILE,
-    time: ticks[ticks.length - 1]/1000,
+    time: (ticks[ticks.length - 1] - ticks[0])/1000,
     speed
   })
   if (state == 'running') {
