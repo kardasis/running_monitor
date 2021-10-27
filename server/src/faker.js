@@ -18,7 +18,8 @@ class Faker {
     const elapsedTime = now - this.startTime
     if (this.mph > 0) {
       this.handler(elapsedTime)
-      const millisToNextTick = MILLIS_PER_HOUR / this.mph / TICKS_PER_MILE 
+      let millisToNextTick = MILLIS_PER_HOUR / this.mph / TICKS_PER_MILE 
+      millisToNextTick = millisToNextTick * (1 + .2*(Math.random() * 2 - 1))
       this.timeout = setTimeout(() => {this.tick()}, millisToNextTick)
     } else {
       this.timeout = setTimeout(() => {this.tick()}, 20)

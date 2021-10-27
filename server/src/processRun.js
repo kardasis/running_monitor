@@ -7,31 +7,30 @@ const SPEED_SMOOTHING = 0.5
 module.exports = {
   processRun: function(rawData) {
     const ticks = debounce(rawData)
-    let speed = 0
 
-    let lastSecond = 1000 
+
     let data = []
-    let acc = []
+    let second = 1
+    let i = 0
+    let speed = 0
+    let acc=[]
 
-    ticks.forEach((t, i) => {
-      if (t > lastSecond) {
-        const ticksPerMillis = (acc.length - 1) / (acc[acc.length - 1] - acc[0])
-        const ticksPerHour = ticksPerMillis * MILLIS_PER_HOUR
-        const immediateSpeed = ticksPerHour / TICKS_PER_MILE
-        speed = SPEED_SMOOTHING*speed + (1 - SPEED_SMOOTHING)*immediateSpeed
-        data.push({
-          time: lastSecond/1000, 
-          speed,
-          distance: i / TICKS_PER_MILE,
-          acc,
-        })
-        lastSecond += 1000
-        acc = [t]
-      } else {
-        acc.push(t)
+    const lastTick = ticks[ticks.length - 1]
+    while (1000 * second < lastTick) {
+      while (ticks[i] < 1000 * second) {
+        acc.push(ticks[i++])
       }
-    })
-
+      const ticksPerMillis = (acc.length < 2) ? 0 : (acc.length - 1) / (acc[acc.length - 1] - acc[0])
+      const immediateSpeed = ticksPerMillis * MILLIS_PER_HOUR / TICKS_PER_MILE
+      speed = SPEED_SMOOTHING*speed + (1 - SPEED_SMOOTHING)*immediateSpeed
+      data.push({
+        time: second, 
+        speed,
+        distance: i / TICKS_PER_MILE,
+      })
+      second += 1
+      acc = [ticks[i]]
+    }
 
     return {
       startTime: rawData.startTime,

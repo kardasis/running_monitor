@@ -97,10 +97,11 @@ function handleData(millis) {
   } 
   ticks.push(millis)
 
-  if ((ticks.length <= 1) || (ticks[ticks.length - 1] - ticks[ticks.length - 2] == 0)) {
+  const TICKS_FOR_SPEED = 10
+  if (ticks.length <= TICKS_FOR_SPEED) {
     speed = 0
   } else {
-    const immediateSpeed = MILLIS_PER_HOUR / (ticks[ticks.length - 1] - ticks[ticks.length - 2]) / TICKS_PER_MILE
+    const immediateSpeed = MILLIS_PER_HOUR * TICKS_FOR_SPEED / (ticks[ticks.length - 1] - ticks[ticks.length - TICKS_FOR_SPEED - 1]) / TICKS_PER_MILE
     speed = SPEED_SMOOTHING * speed + (1 - SPEED_SMOOTHING) * immediateSpeed
   }
   lastTickTime = Date.now()

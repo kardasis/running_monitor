@@ -28,20 +28,24 @@
 
       connection.onmessage = (event) => {
           const data = JSON.parse(event.data);
+          console.log(data)
           if (data.type === "dataPoint") {
+            if (state === 'standby') {
               state = 'running'
-              eventData = data
-              runInfo = [...runInfo, data]
-            } else if (data.type === 'message' && data.message === 'end') {
-                state = 'standby'
-              } else if (data.type === 'milestone') {
-                  state = 'running'
-                  runInfo = data.runInfo
-                }
+              runInfo = []
+            }
+            eventData = data
+            runInfo = [...runInfo, data]
+          } else if (data.type === 'message' && data.message === 'end') {
+            state = 'standby'
+          } else if (data.type === 'milestone') {
+            state = 'running'
+            runInfo = data.runInfo
+          }
         }
       connection.onopen = function () {
-          console.log("Connected to server");
-        }
+        console.log("Connected to server");
+      }
     })
 </script>
 
