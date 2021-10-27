@@ -22,10 +22,13 @@
 </tr>
 
 <style lang="scss">
-  .ghost-speed {
-    width: 160px;
-    & span {
+  .ghost-container {
     font-size: 30px;
+  }
+  .ghost-speed {
+    width: 200px;
+    & span {
+    font-size: 50px;
     }
   }
 </style>

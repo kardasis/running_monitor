@@ -1,4 +1,5 @@
 <script>
+  import { BASE_DOMAIN } from '../utils/constants'
   import { onMount } from 'svelte';
   import LiveChart from './LiveChart.svelte'
   import LiveSpeed from './LiveSpeed.svelte'
@@ -23,7 +24,7 @@
 
 
   onMount(async () => {
-      connection = new WebSocket(process.env.WS_URL);
+      connection = new WebSocket(`ws://${BASE_DOMAIN}:8081`);
 
       connection.onmessage = (event) => {
           const data = JSON.parse(event.data);
@@ -51,7 +52,7 @@
       <div class="current-distance datum">
         <label class="label"> Distance: </label>
         <div class="content">
-          <span class="content">{eventData?.distance.toFixed(3)} </span> mi
+          <span class="content">{eventData?.distance?.toFixed(3)} </span> mi
         </div>
       </div>
     </div>
@@ -86,10 +87,10 @@
   }
   .live-container {
     &.running {
-      background-color: green;
+      background-color: lightgreen;
     }
     &.standby {
-      background-color: red;
+      background-color: pink;
     }
   }
   .datum {
@@ -97,7 +98,7 @@
     flex-direction: row;
   }
   .label {
-    width: 100px;
+    width: 200px;
     margin-right: 5px;
     text-align: right;
     padding-top: 3px;

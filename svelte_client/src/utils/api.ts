@@ -1,5 +1,7 @@
+import { BASE_DOMAIN } from './constants'
+
 export default {
-  baseUrl: 'http://localhost:3030',
+  baseUrl: `http://${BASE_DOMAIN}:3030`,
   getRun: async function(name) {
     if (!name) return null
     const res = (await fetch(`${this.baseUrl}/run/${name}`))

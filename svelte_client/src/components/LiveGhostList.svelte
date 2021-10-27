@@ -39,7 +39,7 @@
 
 <style lang="scss">
   .ghost-list-container {
-    width: 60%;
+    width: 100%;
     text-align: right;
   }
 </style>

@@ -18,7 +18,7 @@
   <div class="current-speed datum">
     <div class="label"> Speed: </div>
     <div class="content">
-      <span class="content large"> {eventData?.speed.toFixed(2) || '0'} </span>mph
+      <span class="content large"> {eventData?.speed?.toFixed(2) || '0'} </span>mph
     </div>
   </div>
   <div class="average-speed datum">
