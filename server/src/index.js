@@ -34,6 +34,7 @@ app.listen(port, () => {
 
 
 dotenv.config()
+console.log(`starting app in environment: ${process.env.ENV}`)
 
 let speed = 0
 let state = 'standby'
@@ -141,12 +142,12 @@ function activityCheck() {
 }
 
 function wsHandler(ws) {
-  runInfo.push({
-    distance: ticks.length / TICKS_PER_MILE,
-    time: (ticks[ticks.length - 1] - ticks[0])/1000,
-    speed
-  })
   if (state == 'running') {
+    runInfo.push({
+      distance: ticks.length / TICKS_PER_MILE,
+      time: (ticks[ticks.length - 1] - ticks[0])/1000,
+      speed
+    })
     ws.send(JSON.stringify({ 
       type: 'dataPoint',
       ...runInfo[runInfo.length - 1],
