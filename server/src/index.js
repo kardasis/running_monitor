@@ -45,32 +45,34 @@ let lastTickTime
 let faker
 let websocket
 
-keypress(process.stdin);
-process.stdin.on('keypress', function (ch, key) {
-  if (key && key.name === "c" && key.ctrl) {
-    console.log("bye bye");
-    process.exit();
-  } else if (key && key.name == 'k') {
-    if (faker) {
-      faker.speedUp()
-    }
-  } else if (key && key.name == 'j') {
-    if (faker) {
-      faker.speedDown()
-    }
-  } else if (key && key.name == 's') {
-    if (faker) {
-      faker.start()
-    }
-  } else if (key && key.name == 'e') {
-    if (faker) {
-      faker.stop()
-    }
-  } 
-})
+if (process.env.ENV == 'DEVELOPMENT') {
+  keypress(process.stdin);
+  process.stdin.on('keypress', function (ch, key) {
+    if (key && key.name === "c" && key.ctrl) {
+      console.log("bye bye");
+      process.exit();
+    } else if (key && key.name == 'k') {
+      if (faker) {
+        faker.speedUp()
+      }
+    } else if (key && key.name == 'j') {
+      if (faker) {
+        faker.speedDown()
+      }
+    } else if (key && key.name == 's') {
+      if (faker) {
+        faker.start()
+      }
+    } else if (key && key.name == 'e') {
+      if (faker) {
+        faker.stop()
+      }
+    } 
+  })
 
-process.stdin.setRawMode(true);
-process.stdin.resume();
+  process.stdin.setRawMode(true);
+  process.stdin.resume();
+}
 
 SerialPort.list().then((list) => {
   let port
