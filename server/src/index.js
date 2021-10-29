@@ -10,7 +10,7 @@ const { processRun } = require('./processRun')
 const express = require('express')
 const cors = require('cors')
 
-const SPEED_SMOOTHING = .8
+const SPEED_SMOOTHING = .9
 const port = 3030
 const app = express()
 
@@ -100,7 +100,7 @@ function handleData(millis) {
   } 
   ticks.push(millis)
 
-  const TICKS_FOR_SPEED = 10
+  const TICKS_FOR_SPEED = 30
   if (ticks.length <= TICKS_FOR_SPEED) {
     speed = 0
   } else {

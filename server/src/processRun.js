@@ -1,8 +1,4 @@
-const TICKS_PER_MILE = 5280*2
-const MILLIS_PER_HOUR = 1000 * 60 * 60
-const DEBOUNCE_TIME = 20
-const SPEED_SMOOTHING = 0.5
-
+const { TICKS_PER_MILE, MILLIS_PER_HOUR, DEBOUNCE_TIME, SPEED_SMOOTHING } = require('./constants')
 
 module.exports = {
   processRun: function(rawData) {
