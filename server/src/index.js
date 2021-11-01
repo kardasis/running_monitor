@@ -10,9 +10,11 @@ const { processRun } = require('./processRun')
 const express = require('express')
 const cors = require('cors')
 
-const SPEED_SMOOTHING = .9
+const SPEED_SMOOTHING = 0
 const port = 3030
 const app = express()
+
+let wsInterval
 
 app.use(cors())
 
@@ -99,15 +101,15 @@ function handleData(millis) {
     startTime = Date.now()
   } 
   ticks.push(millis)
+  lastTickTime = Date.now()
 
-  const TICKS_FOR_SPEED = 30
+  const TICKS_FOR_SPEED = 100
   if (ticks.length <= TICKS_FOR_SPEED) {
     speed = 0
   } else {
     const immediateSpeed = MILLIS_PER_HOUR * TICKS_FOR_SPEED / (ticks[ticks.length - 1] - ticks[ticks.length - TICKS_FOR_SPEED - 1]) / TICKS_PER_MILE
     speed = SPEED_SMOOTHING * speed + (1 - SPEED_SMOOTHING) * immediateSpeed
   }
-  lastTickTime = Date.now()
 }
 
 function endRun() {
@@ -132,8 +134,8 @@ function uploadRun() {
   }
 }
 
-const intervalId = setInterval(activityCheck, 1000);
-function activityCheck() {
+const intervalId = setInterval(intervalHandler, 1000);
+function intervalHandler() {
   if (state == 'running') {
     const now = Date.now()
     const timeoutTime = faker ? 1000 : 30000
@@ -164,7 +166,10 @@ wss.on('connection', function connection(ws) {
   if (state === 'running') {
     ws.send(JSON.stringify({ type: 'milestone', runInfo }))
   }
-  setInterval(() => {wsHandler(ws)}, 1000);
+  if (wsInterval) {
+    clearInterval(wsInterval)
+  }
+  wsInterval = setInterval(() => {wsHandler(ws)}, 1000);
 })
 
 
