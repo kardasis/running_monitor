@@ -4,21 +4,28 @@ module.exports = {
   processRun: function(rawData) {
     const ticks = debounce(rawData)
 
+    const deltaTicks = []
+    ticks.forEach((d, i) => {
+      if (i > 0) {
+        deltaTicks.push(ticks[i] - ticks[i-1])
+      }
+    })
 
     let data = []
     let second = 1
     let i = 0
     let speed = 0
-    let acc=[]
 
     const lastTick = ticks[ticks.length - 1]
     while (1000 * second < lastTick) {
+      const windowBegin = i
       while (ticks[i] < 1000 * second) {
-        acc.push(ticks[i++])
+        i++
       }
-      const ticksPerMillis = (acc.length < 2) ? 0 : (acc.length - 1) / (acc[acc.length - 1] - acc[0])
-      const immediateSpeed = ticksPerMillis * MILLIS_PER_HOUR / TICKS_PER_MILE
-      speed = SPEED_SMOOTHING*speed + (1 - SPEED_SMOOTHING)*immediateSpeed
+      const ticksPerMillis = (i - windowBegin)/(ticks[i] - ticks[windowBegin]) 
+      const immediateSpeed = isNaN(ticksPerMillis) ? 0 : ticksPerMillis * MILLIS_PER_HOUR / TICKS_PER_MILE 
+      speed = immediateSpeed * (1-SPEED_SMOOTHING) + SPEED_SMOOTHING * speed
+
       data.push({
         time: second, 
         speed,
@@ -40,7 +47,7 @@ module.exports = {
 }
 
 function calculateFastestMile(data) {
-  let left=0, right=0
+  let left=0, right=0, bestLeft, bestRight
   let mileTime = 10000
   let done = false
   while (right < data.length) {
@@ -56,10 +63,14 @@ function calculateFastestMile(data) {
     }
     if ((data[right].time - data[left].time) < mileTime) {
       mileTime = data[right].time - data[left].time
+      bestLeft = data[left].time
+      bestRight = data[right].time
+      leftD = data[left].distance
+      rightD = data[right].distance
     }
     left = left + 1
   }
-  return {mileTime, left, right}
+  return {mileTime, left: bestLeft, right: bestRight, leftD, rightD}
 }
 
 function calculateMaxRectangle(data) {
@@ -98,11 +109,12 @@ function calculateMaxRectangle(data) {
 function debounce(tickData) {
   const ticks = []
   let lastTick
-  tickData.ticks.forEach((t, i) => {
+  const trimmedTicks = tickData.ticks.slice(0, -1)
+  trimmedTicks.forEach((t, i) => {
     if (i==0) {
-      lastTick = parseInt(t)-parseInt(tickData.ticks[0])
+      lastTick = parseInt(t)-parseInt(trimmedTicks[0])
     } else {
-      const thisTick = parseInt(t)-parseInt(tickData.ticks[0])
+      const thisTick = parseInt(t)-parseInt(trimmedTicks[0])
       if (thisTick - lastTick > DEBOUNCE_TIME) {
         ticks.push(thisTick)
         lastTick = thisTick

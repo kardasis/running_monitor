@@ -103,13 +103,18 @@ function handleData(millis) {
   ticks.push(millis)
   lastTickTime = Date.now()
 
-  const TICKS_FOR_SPEED = 100
-  if (ticks.length <= TICKS_FOR_SPEED) {
-    speed = 0
-  } else {
-    const immediateSpeed = MILLIS_PER_HOUR * TICKS_FOR_SPEED / (ticks[ticks.length - 1] - ticks[ticks.length - TICKS_FOR_SPEED - 1]) / TICKS_PER_MILE
-    speed = SPEED_SMOOTHING * speed + (1 - SPEED_SMOOTHING) * immediateSpeed
+  let i = ticks.length - 1
+  const windowBegin = i
+  const lastTick = ticks[i]
+  while (ticks[i] > lastTick - 1000) {
+    if (i == 0) {
+      break
+    }
+    i--
   }
+  const ticksPerMillis = (i - windowBegin)/(ticks[i] - ticks[windowBegin]) 
+  const immediateSpeed = isNaN(ticksPerMillis) ? 0 : ticksPerMillis * MILLIS_PER_HOUR / TICKS_PER_MILE 
+  speed = immediateSpeed * (1-SPEED_SMOOTHING) + SPEED_SMOOTHING * speed
 }
 
 function endRun() {
