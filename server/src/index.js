@@ -5,6 +5,7 @@ const WebSocket= require('ws')
 const {putToS3, fetchRuns, fetchRun} = require('./aws')
 const dotenv = require('dotenv')
 const { Faker } = require('./faker')
+const loggerFactory = require('./logger')
 
 const { processRun } = require('./processRun')
 const express = require('express')
@@ -15,6 +16,8 @@ const port = 3030
 const app = express()
 
 let wsInterval
+let logger
+let speedDetails = {}
 
 app.use(cors())
 
@@ -99,6 +102,7 @@ function handleData(millis) {
     ticks = []
     runInfo = []
     startTime = Date.now()
+    logger = loggerFactory(startTime)
   } 
   ticks.push(millis)
   lastTickTime = Date.now()
@@ -112,9 +116,15 @@ function handleData(millis) {
     }
     i--
   }
-  const ticksPerMillis = (i - windowBegin)/(ticks[i] - ticks[windowBegin]) 
+  const tickCount = (windowBegin - i)
+  const elapsedTime = (ticks[windowBegin] - ticks[i] )
+  const ticksPerMillis = tickCount/elapsedTime 
   const immediateSpeed = isNaN(ticksPerMillis) ? 0 : ticksPerMillis * MILLIS_PER_HOUR / TICKS_PER_MILE 
   speed = immediateSpeed * (1-SPEED_SMOOTHING) + SPEED_SMOOTHING * speed
+  speedDetails = {
+    i, windowBegin, immediateSpeed, tickCount, elapsedTime, 
+    ticks: ticks.slice(i, windowBegin + 1)
+  }
 }
 
 function endRun() {
@@ -157,6 +167,7 @@ function wsHandler(ws) {
       time: (ticks[ticks.length - 1] - ticks[0])/1000,
       speed
     })
+    logger.info(speedDetails)
     ws.send(JSON.stringify({ 
       type: 'dataPoint',
       ...runInfo[runInfo.length - 1],

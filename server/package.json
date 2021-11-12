@@ -18,6 +18,7 @@
     "luxon": "^1.26.0",
     "pug": "^3.0.2",
     "serialport": "^9.0.7",
+    "winston": "^3.3.3",
     "ws": "^7.4.5"
   },
   "devDependencies": {

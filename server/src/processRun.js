@@ -32,7 +32,6 @@ module.exports = {
         distance: i / TICKS_PER_MILE,
       })
       second += 1
-      acc = [ticks[i]]
     }
 
     return {
