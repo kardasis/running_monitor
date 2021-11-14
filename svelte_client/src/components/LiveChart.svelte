@@ -5,22 +5,28 @@
   let chartDiv
 
   const margin = {top: 10, right: 30, bottom: 30, left: 30}
+  let totalHeight, width, height
+
+  onMount(() => {
+      totalHeight = 400
+      width = chartDiv.offsetWidth - margin.left - margin.right
+      height = totalHeight - margin.top - margin.bottom
+    })
 
   afterUpdate(() => {
       const windowedRunInfo = runInfo.slice(-600)
-      const width = chartDiv.offsetWidth - margin.left - margin.right
-      const height = 600 - margin.top - margin.bottom
+
       d3.select('#chart > *').remove()
       var svg = d3.select("#chart")
         .append("svg")
-        .attr("width", width + margin.top + margin.bottom)
-        .attr("height", height + margin.top + margin.bottom)
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", totalHeight)
         .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
 
       // x-axis
       const domain = d3.extent(windowedRunInfo, t => t.time )
-      domain[1] = Math.max(domain[1], 600)
+      /* domain[0] = Math.max(domain[1], totalHeight) */
       var x = d3.scaleLinear()
         .domain(domain)
         .range([ 0, width ])
@@ -43,7 +49,7 @@
       svg.append('path')
         .datum(windowedRunInfo)
         .attr('stroke', 'none')
-        .attr('fill', 'teal')
+        .attr('fill', '#ccc')
         .attr("d", d3.area()
             .x(function(d) { return x(d.time) })
             .y0(y(0))
@@ -56,8 +62,11 @@
 
 <style>
   #chart {
-    background-color: #dfeb9d;
-    border: 2px solid black;
+    background-color: #eee;
+    border: 1px solid black;
+    border-radius: 20px;
     margin: 10px;
+    flex: 1;
+    padding: 20px;
   }
 </style>

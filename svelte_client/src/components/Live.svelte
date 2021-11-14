@@ -2,7 +2,7 @@
   import { BASE_DOMAIN } from '../utils/constants'
   import { onMount } from 'svelte';
   import LiveChart from './LiveChart.svelte'
-  import LiveSpeed from './LiveSpeed.svelte'
+  import LiveHeadline from './LiveHeadline.svelte'
   import LiveGhostList from './LiveGhostList.svelte'
 
 
@@ -10,17 +10,6 @@
   let state = 'standby'
   let eventData
   let runInfo = []
-  $: speed = eventData?.speed
-  $: timeString = toTimeString(eventData?.time)
-
-  const toTimeString = (secs) => {
-      if (secs) {
-          const s = secs % 60
-          return `${(secs - s)/60}:${parseInt(s).toString().padStart(2, '0')}`
-        } else {
-            return null
-          }
-    }
 
 
   onMount(async () => {
@@ -28,7 +17,6 @@
 
       connection.onmessage = (event) => {
           const data = JSON.parse(event.data);
-          console.log(data)
           if (data.type === "dataPoint") {
             if (state === 'standby') {
               state = 'running'
@@ -50,31 +38,21 @@
 </script>
 
 <div class="live-container {state}">
-  <div class="data-container">
-    <LiveSpeed {eventData} {runInfo} />
-    <div class="distance-info">
-      <div class="current-distance datum">
-        <label class="label"> Distance: </label>
-        <div class="content">
-          <span class="content">{eventData?.distance?.toFixed(3)} </span> mi
-        </div>
-      </div>
-    </div>
-    <div class="distance-info">
-      <div class="current-distance datum">
-        <label class="label"> Time: </label>
-        <div class="content">
-          <span class="content">{timeString}</span>
-        </div>
-      </div>
-    </div>
+  <LiveHeadline {runInfo} {eventData} />
+  <div class="right-panel" >
+    <LiveGhostList {runInfo} />
+    <LiveChart {runInfo} />
   </div>
-  <LiveGhostList {runInfo} />
-  <LiveChart {runInfo} />
 </div>
 
 
 <style lang="scss">
+  .right-panel {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
   .hide {
     visibility: hidden;
   }
@@ -90,12 +68,9 @@
     }
   }
   .live-container {
-    &.running {
-      background-color: lightgreen;
-    }
-    &.standby {
-      background-color: pink;
-    }
+    height: 100%;
+    display: flex;
+    flex-direction: row;
   }
   .datum {
     display: flex;
@@ -106,13 +81,5 @@
     margin-right: 5px;
     text-align: right;
     padding-top: 3px;
-  }
-  .data-container {
-    & > * {
-    }
-    margin: 20px;
-    background-color: #eeffff;
-    display: flex;
-    flex-direction: row;
   }
 </style>

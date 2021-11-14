@@ -22,9 +22,8 @@
     display: flex;
     flex-direction: column;
     text-align: center;
-    padding: 1em;
-    max-width: 240px;
     margin: 0 auto;
+    height: 100%;
   }
 
   @media (min-width: 640px) {
@@ -32,4 +31,11 @@
       max-width: none;
     }
   }
+  :global(body){
+    height: 100%;
+  }
+  :global(html){
+    height: 100%;
+  }
+
 </style>

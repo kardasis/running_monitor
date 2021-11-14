@@ -49,6 +49,16 @@
         .attr('height', y(0) - y(run.maxRectangle.height))
         .attr('stroke', 'white')
         .attr('fill', '#69a3b2')
+
+      const bestMileAverageSpeed = 3600.0/(run.bestMile.mileTime)
+      console.log(run.bestMile)
+      svg.append('rect')
+        .attr('x', x(run.bestMile.left))
+        .attr('y', y(bestMileAverageSpeed))
+        .attr('width', x(run.bestMile.right - run.bestMile.left))
+        .attr('height', y(0) - y(bestMileAverageSpeed))
+        .attr('stroke', '888888')
+        .attr('fill', '#44444488')
     })
 </script>
 

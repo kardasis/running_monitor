@@ -2,33 +2,46 @@
   export let ghostSpeed
   export let time
   export let distance
+  export let currentSpeed
 
   $: ghostDistance = ghostSpeed*time / 3600
+  $: catchTime = ((ghostDistance - distance)/(currentSpeed - ghostSpeed) * 3600).toFixed(0)
 </script>
 
-<tr class="ghost-container">
-  <td class="ghost-speed">
+<div class="ghost-container">
+  <div class="ghost-speed">
     <span>{ghostSpeed.toFixed(2)}</span> mph
-  </td>
-  <td>
+  </div>
+  <div>
     {ghostDistance.toFixed(3)}
-  </td>
-  <td>
-    {(distance - ghostDistance).toFixed(3)}
-  </td>
-  <td>
-    {((ghostDistance - distance)/(ghostSpeed - distance/time) * 3600).toFixed(0)} sec
-  </td>
-</tr>
+  </div>
+  <div>
+    {(ghostDistance - distance).toFixed(3)}
+  </div>
+  <div>
+    {catchTime > 0 ? `${catchTime}s` : '--'}
+  </div>
+</div>
 
 <style lang="scss">
   .ghost-container {
-    font-size: 30px;
+    background-color: lightgrey;
+    margin: 5px auto;
+    padding: 2px 20px;
+    width: 80%;
+    border: 1px solid grey;
+    border-radius: 30px;
+    display: flex;
+    flex-direction: row;
+    & div {
+      align-self: center;
+      flex: 1;
+    }
+    font-size: 50px;
   }
   .ghost-speed {
-    width: 200px;
     & span {
-    font-size: 50px;
+      font-size: 80px;
     }
   }
 </style>

@@ -1,4 +1,4 @@
-const { TICKS_PER_MILE, MILLIS_PER_HOUR } = require('./constants')
+const {DEBOUNCE_TIME, TICKS_PER_MILE, MILLIS_PER_HOUR } = require('./constants')
 const keypress = require('keypress')
 const SerialPort= require('serialport')
 const WebSocket= require('ws')
@@ -100,30 +100,34 @@ function handleData(millis) {
   if (state == 'standby') {
     state = 'running'
     ticks = []
+    debouncedTicks = []
     runInfo = []
     startTime = Date.now()
     logger = loggerFactory(startTime)
   } 
+  if (ticks.length == 0 || millis - ticks[ticks.length - 1] > DEBOUNCE_TIME) {
+    debouncedTicks.push(millis)
+  }
   ticks.push(millis)
   lastTickTime = Date.now()
 
-  let i = ticks.length - 1
+  let i = debouncedTicks.length - 1
   const windowBegin = i
-  const lastTick = ticks[i]
-  while (ticks[i] > lastTick - 1000) {
+  const lastTick = debouncedTicks[i]
+  while (debouncedTicks[i] > lastTick - 1000) {
     if (i == 0) {
       break
     }
     i--
   }
   const tickCount = (windowBegin - i)
-  const elapsedTime = (ticks[windowBegin] - ticks[i] )
+  const elapsedTime = (debouncedTicks[windowBegin] - debouncedTicks[i] )
   const ticksPerMillis = tickCount/elapsedTime 
   const immediateSpeed = isNaN(ticksPerMillis) ? 0 : ticksPerMillis * MILLIS_PER_HOUR / TICKS_PER_MILE 
   speed = immediateSpeed * (1-SPEED_SMOOTHING) + SPEED_SMOOTHING * speed
   speedDetails = {
     i, windowBegin, immediateSpeed, tickCount, elapsedTime, 
-    ticks: ticks.slice(i, windowBegin + 1)
+    debouncedTicks: debouncedTicks.slice(i, windowBegin + 1)
   }
 }
 

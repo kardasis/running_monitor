@@ -1,14 +1,17 @@
 <script>
   import RunChart from './RunChart.svelte'
-  import time from '../utils/time'
+  import {durationString} from '../utils/time'
 
   export let run = {}
   $: runDistance = run.data[run.data.length - 1].distance.toFixed(3)
-  $: runDuration = time.durationString(run.data[run.data.length - 1].time)
+  $: runDuration = durationString(run.data[run.data.length - 1].time)
   $: runSpeed = (runDistance/(run.data[run.data.length - 1].time) * 3600).toFixed(3) + ' mph'
-  $: fastestMile = time.durationString(run.bestMile.mileTime)
+  $: fastestMileTime = durationString(run.bestMile.mileTime)
+  $: fastestMileSpeed = (3600.0/run.bestMile.mileTime).toFixed(2)
   $: startTime = calculateDisplayTime()
-  $: largestRect = (run.maxRectangle.area/3600).toFixed(2)
+  $: largestRect = `${(run.maxRectangle.area/3600).toFixed(2)}, ${durationString(run.maxRectangle.end - run.maxRectangle.start)} * ${run.maxRectangle.height.toFixed(2)}`
+
+  console.log(run.bestMile)
 
   const calculateDisplayTime = () => {
       const res = new Date(0)
@@ -33,7 +36,7 @@
     </div>
     <div class="column">
       <div class="stat">
-        <div class="label">Fastest Mile:</div><div class="data-content"> {fastestMile}</div>
+        <div class="label">Fastest Mile:</div><div class="data-content"> {fastestMileTime} / {fastestMileSpeed} mph </div>
       </div>
       <div class="stat">
         <div class="label">Largest rect:</div><div class="data-content"> {largestRect}</div>
