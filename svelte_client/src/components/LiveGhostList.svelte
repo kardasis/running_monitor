@@ -22,12 +22,13 @@
     }
 
   })
+  const trailingGhostCount = 2, leadingGhostCount = 4
   $: floor = Math.floor(averageSpeed * 10) / 10
   $: ceil = floor + .1
-  $: trailingGhostSpeeds = Array(2).fill(0).map((v, i) => {
-      return floor -.1 + i*.1
+  $: trailingGhostSpeeds = Array(trailingGhostCount + 1).fill(0).map((v, i) => {
+      return floor - trailingGhostCount * .1 + i*.1
    })
-  $: leadingGhostSpeeds = Array(3).fill(0).map((v, i) => {
+  $: leadingGhostSpeeds = Array(leadingGhostCount + 1).fill(0).map((v, i) => {
       return ceil + i*.1
    })
   $: ghostSpeeds = trailingGhostSpeeds.concat(['x'], leadingGhostSpeeds)
@@ -59,7 +60,7 @@
       align-self: center;
       width: 100%;
       position: relative;
-      top: -115px;
+      top: -106px;
     }
     display: flex;
     flex-direction: column;
@@ -72,7 +73,7 @@
     border: 1px solid #ccc;
     text-align: right;
     overflow: hidden;
-    min-height: 488px;
+    min-height: 665px;
   }
   .live-runner {
     z-index: 2;

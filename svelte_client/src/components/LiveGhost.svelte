@@ -13,21 +13,18 @@
     <span>{ghostSpeed.toFixed(2)}</span> mph
   </div>
   <div>
-    {ghostDistance.toFixed(3)}
-  </div>
-  <div>
     {(ghostDistance - distance).toFixed(3)}
   </div>
   <div>
-    {catchTime > 0 ? `${catchTime}s` : '--'}
+    {catchTime} s
   </div>
 </div>
 
 <style lang="scss">
   .ghost-container {
     background-color: lightgrey;
-    margin: 5px auto;
-    padding: 2px 20px;
+    margin: 2px auto;
+    padding: 1px 20px;
     width: 80%;
     border: 1px solid grey;
     border-radius: 30px;

@@ -5,13 +5,15 @@
   export let runInfo
 
   $: timeString = durationString(eventData?.time)
+  $: fastestMileString = eventData?.fastestMile ? durationString(eventData.fastestMile.bestTime/1000): '-'
+  $: fastestLapString = eventData?.fastestLap ? durationString(eventData.fastestLap.bestTime/1000): '-'
 </script>
 
 <div class="container">
   <div class="datum">
     <label class="label"> Speed: </label>
     <div class="content">
-      <span class="content"> {eventData?.speed?.toFixed(2) || '0'} </span>mph
+      <span class="content"> {eventData?.speed?.toFixed(2) || '0'} </span>
     </div>
   </div>
   <div class="datum">
@@ -21,9 +23,15 @@
     </div>
   </div>
   <div class="datum">
+    <label class="label"> Fastest Lap: </label>
+    <div class="content">
+      <span class="content">{fastestLapString}</span>
+    </div>
+  </div>
+  <div class="datum">
     <label class="label"> Fastest Mile: </label>
     <div class="content">
-      <span class="content">xxx</span>
+      <span class="content">{fastestMileString}</span>
     </div>
   </div>
   <div class="datum">

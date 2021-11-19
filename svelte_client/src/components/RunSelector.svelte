@@ -35,16 +35,19 @@
 
 <style lang="scss">
   .run-list{
+    height: 800px;
+    overflow-y: scroll;
     display: flex;
     flex-direction: column;
-    width: 200px;
+    width: 300px;
+    border: 1px solid grey;
     padding: 0px;
   }
   .run-button{
     border-width: 0px 0px 1px;
     background-color: #ffffdd;
     margin: 0;
-    padding: 20px;
+    padding: 5px 20px;
     &:hover {
       background-color: lightgrey;
     }

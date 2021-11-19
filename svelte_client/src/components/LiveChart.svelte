@@ -8,7 +8,7 @@
   let totalHeight, width, height
 
   onMount(() => {
-      totalHeight = 400
+      totalHeight = 200
       width = chartDiv.offsetWidth - margin.left - margin.right
       height = totalHeight - margin.top - margin.bottom
     })

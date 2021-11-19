@@ -11,10 +11,8 @@ export const durationString = function(input: number): String  {
   const h = (seconds - s - 60*m)/3600
   if (h > 0) {
     return `${h}:${pad(m, 2)}:${pad(s, 2)}`
-  } else if (m>0) {
-    return `${m}:${pad(s, 2)}`
   } else {
-    return `${s}`
+    return `${m}:${pad(s, 2)}`
   }
 
 }

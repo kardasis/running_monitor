@@ -5,7 +5,6 @@ const WebSocket= require('ws')
 const {putToS3, fetchRuns, fetchRun} = require('./aws')
 const dotenv = require('dotenv')
 const { Faker } = require('./faker')
-const loggerFactory = require('./logger')
 
 const { processRun } = require('./processRun')
 const express = require('express')
@@ -15,8 +14,9 @@ const SPEED_SMOOTHING = 0
 const port = 3030
 const app = express()
 
+let fastestMile, fastestLap = null
+
 let wsInterval
-let logger
 let speedDetails = {}
 
 app.use(cors())
@@ -91,7 +91,7 @@ SerialPort.list().then((list) => {
     parser.on('data', handleData)
   } else {
     console.log('failed to connect to arduino. Fake data time')
-    faker = new Faker(handleData, 1.0)
+    faker = new Faker(handleData, 6.0)
   }
 })
 
@@ -103,7 +103,6 @@ function handleData(millis) {
     debouncedTicks = []
     runInfo = []
     startTime = Date.now()
-    logger = loggerFactory(startTime)
   } 
   if (ticks.length == 0 || millis - ticks[ticks.length - 1] > DEBOUNCE_TIME) {
     debouncedTicks.push(millis)
@@ -166,17 +165,43 @@ function intervalHandler() {
 
 function wsHandler(ws) {
   if (state == 'running') {
+    fastestMile = updateFastestDist(fastestMile, debouncedTicks, 1)
+    fastestLap = updateFastestDist(fastestLap, debouncedTicks, .25)
     runInfo.push({
-      distance: ticks.length / TICKS_PER_MILE,
-      time: (ticks[ticks.length - 1] - ticks[0])/1000,
+      distance: debouncedTicks.length / TICKS_PER_MILE,
+      time: (debouncedTicks[debouncedTicks.length - 1] - debouncedTicks[0])/1000,
+      fastestMile,
+      fastestLap,
       speed
     })
-    logger.info(speedDetails)
     ws.send(JSON.stringify({ 
       type: 'dataPoint',
       ...runInfo[runInfo.length - 1],
     }))
   }
+}
+
+function updateFastestDist(oldFastestMile, ticks, miles = 1) {
+  const ticks_per_dist = Math.floor(TICKS_PER_MILE * miles)
+  if (ticks.length <= ticks_per_dist) {
+    return null
+  }
+  if (!oldFastestMile) {
+    oldFastestMile = {
+      bestTime : ticks[ticks_per_dist] - ticks[0],
+      left: 0,
+    }
+  }
+
+  let bestTime = oldFastestMile.bestTime
+  let left = oldFastestMile.left
+  for (let i = oldFastestMile.left ; i < ticks.length - ticks_per_dist ; i++) {
+    if (ticks[ticks_per_dist + i] - ticks[i] < bestTime) {
+      bestTime = ticks[i + ticks_per_dist] - ticks[i] 
+      left = i
+    }
+  }
+  return {bestTime, left }
 }
 
 const wss = new WebSocket.Server({ port: 8081 });
