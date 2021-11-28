@@ -17,6 +17,8 @@ module.exports = {
     let speed = 0
 
     const lastTick = ticks[ticks.length - 1]
+    let cumulativeCalories = 0
+
     while (1000 * second < lastTick) {
       const windowBegin = i
       while (ticks[i] < 1000 * second) {
@@ -25,12 +27,17 @@ module.exports = {
       const ticksPerMillis = (i - windowBegin)/(ticks[i] - ticks[windowBegin]) 
       const immediateSpeed = isNaN(ticksPerMillis) ? 0 : ticksPerMillis * MILLIS_PER_HOUR / TICKS_PER_MILE 
       speed = immediateSpeed * (1-SPEED_SMOOTHING) + SPEED_SMOOTHING * speed
+      const incline = 1
+      const weight = 192
+      const calories = (1/60) * (weight/26400) * ( speed * (322 + 14.5 * incline) + 210 )
 
       data.push({
         time: second, 
         speed,
         distance: i / TICKS_PER_MILE,
+        calories
       })
+      cumulativeCalories += calories
       second += 1
     }
 
@@ -40,7 +47,8 @@ module.exports = {
       totalTime: data[data.length - 1].time,
       totalDistance: data[data.length - 1].distance,
       maxRectangle: calculateMaxRectangle(data),
-      bestMile: calculateFastestMile(data)
+      bestMile: calculateFastestMile(data),
+      cumulativeCalories
     }
   }
 }
@@ -122,3 +130,4 @@ function debounce(tickData) {
   })
   return ticks
 }
+

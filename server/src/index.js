@@ -47,6 +47,7 @@ let ticks = []
 let runInfo = []
 let startTime
 let lastTickTime
+
 let faker
 let websocket
 
