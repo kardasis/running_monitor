@@ -12,7 +12,7 @@
       d3.select('#chart > *').remove()
       var svg = d3.select("#chart")
         .append("svg")
-        .attr("width", width + margin.top + margin.bottom)
+        .attr("width", width)
         .attr("height", height + margin.top + margin.bottom)
         .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
@@ -20,7 +20,7 @@
       // x-axis
       var x = d3.scaleLinear()
         .domain(d3.extent(run.data, t => t.time))
-        .range([ 0, width ])
+        .range([ 0, width])
       svg.append("g")
         .attr("transform", "translate(0," + height + ")")
         .call(d3.axisBottom(x)
@@ -51,7 +51,6 @@
         .attr('fill', '#69a3b2')
 
       const bestMileAverageSpeed = 3600.0/(run.bestMile.mileTime)
-      console.log(run.bestMile)
       svg.append('rect')
         .attr('x', x(run.bestMile.left))
         .attr('y', y(bestMileAverageSpeed))
@@ -67,7 +66,7 @@
 <style>
   #chart {
     background-color: pink;
-    border: 2px solid black;
+    border: 1px solid black;
     margin: 10px;
   }
 </style>

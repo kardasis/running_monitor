@@ -1,5 +1,4 @@
 <script>
-
   import api from '../utils/api'
   import { onMount } from 'svelte';
 
@@ -19,21 +18,27 @@
       const timestamp = name.split('-')[1].split('.')[0]
       const res = new Date(0)
       res.setUTCSeconds(timestamp/1000)
-      return res.toDateString() + '<br>' + res.toLocaleTimeString()
+      return res.toDateString() + res.toLocaleTimeString()
     }
 </script>
 
-<div class="run-list">
-  {#each runs as runName (runName)}
-    <button 
-     class="run-button {runName === selectedRun ? 'selected' : ''}" 
-     on:click={() => activateRun(runName)}>
-      {@html displayTime(runName)}
-    </button>
-  {/each}
+<div class="container">
+  <div class="run-list">
+    {#each runs as runName (runName)}
+      <button 
+       class="run-button {runName === selectedRun ? 'selected' : ''}" 
+       on:click={() => activateRun(runName)}>
+       {@html displayTime(runName)}
+      </button>
+    {/each}
+  </div>
 </div>
 
 <style lang="scss">
+  .container{
+    display: flex;
+    flex-direction: column;
+  }
   .run-list{
     height: 800px;
     overflow-y: scroll;

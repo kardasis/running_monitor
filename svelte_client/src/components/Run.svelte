@@ -10,6 +10,7 @@
   $: fastestMileSpeed = (3600.0/run.bestMile.mileTime).toFixed(2)
   $: startTime = calculateDisplayTime()
   $: largestRect = `${(run.maxRectangle.area/3600).toFixed(2)}, ${durationString(run.maxRectangle.end - run.maxRectangle.start)} * ${run.maxRectangle.height.toFixed(2)}`
+  $: calories = run.cumulativeCalories?.toFixed(0)
 
   console.log(run.bestMile)
 
@@ -40,6 +41,9 @@
       </div>
       <div class="stat">
         <div class="label">Largest rect:</div><div class="data-content"> {largestRect}</div>
+      </div>
+      <div class="stat">
+        <div class="label">Calories</div><div class="data-content"> {calories}</div>
       </div>
     </div>
   </div>
@@ -84,6 +88,6 @@
     border-radius: 10px;
     border: 1px solid black;
     background-color: #eee;
-    width: 100%;
+    width: calc(100% - 120px);
   }
 </style>
