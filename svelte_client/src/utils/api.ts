@@ -1,14 +1,21 @@
-import { BASE_DOMAIN } from './constants'
+import { BASE_DOMAIN, API_BASE } from './constants'
 
 export default {
-  baseUrl: `http://${BASE_DOMAIN}:3030`,
-  getRun: async function(name) {
-    if (!name) return null
-    const res = (await fetch(`${this.baseUrl}/run/${name}`))
+  reprocessAllRuns: async function(runId) {
+    const url = `${API_BASE}/process_run?bucketName=arikardasis-runs`
+  },
+  processRun: async function(runId) {
+    const url = `${API_BASE}/process_run?bucketName=arikardasis-runs&objectKey=${runId}.json`
+    const res = await fetch(url)
+    return res.json()
+  },
+  getRunData: async function(runId) {
+    if (runId === '') return null
+    const res = (await fetch(`${API_BASE}/run_data/${runId}`))
     return res.json()
   },
   getRuns: async function() {
-    const res = await fetch(`${this.baseUrl}/runs`)
-    return res.json()
+    const res = await fetch(`${API_BASE}/runs`)
+    return (await res.json()).Items
   }
 }

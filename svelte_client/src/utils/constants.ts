@@ -1,2 +1,3 @@
+export const API_BASE = 'https://runner.arikardasis.com'
 export const BASE_DOMAIN = '192.168.86.40'
 // export const BASE_DOMAIN = 'localhost'

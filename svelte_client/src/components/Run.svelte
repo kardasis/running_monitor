@@ -8,16 +8,15 @@
   $: runSpeed = (runDistance/(run.data[run.data.length - 1].time) * 3600).toFixed(3) + ' mph'
   $: fastestMileTime = durationString(run.bestMile.mileTime)
   $: fastestMileSpeed = (3600.0/run.bestMile.mileTime).toFixed(2)
-  $: startTime = calculateDisplayTime()
+  $: startTime = calculateDisplayTime(run.startTime)
   $: largestRect = `${(run.maxRectangle.area/3600).toFixed(2)}, ${durationString(run.maxRectangle.end - run.maxRectangle.start)} * ${run.maxRectangle.height.toFixed(2)}`
-  $: calories = run.cumulativeCalories?.toFixed(0)
+  $: calories = run.totalCalories?.toFixed(0)
 
-  console.log(run.bestMile)
-
-  const calculateDisplayTime = () => {
+  const calculateDisplayTime = (time) => {
       const res = new Date(0)
-      res.setUTCSeconds(run.startTime/1000)
-      return res.toDateString() + ' ' +  res.toLocaleTimeString()
+      res.setUTCSeconds(time/1000)
+      return res.toDateString() + ' ' +  res.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
     }
 </script>
 

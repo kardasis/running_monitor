@@ -5,6 +5,7 @@ function pad(num: number, size: number): String {
 }
 
 export const durationString = function(input: number): String  {
+  if (!input) return '0:00'
   const seconds = Math.round(input)
   const s = seconds % 60
   const m = ((seconds -s)/60) % 60
