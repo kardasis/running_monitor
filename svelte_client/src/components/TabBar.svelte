@@ -1,32 +1,16 @@
 <script>
-  import Tab, { Label } from '@smui/tab';
-  import TabBar from '@smui/tab-bar/styled'
-
   export let active = ''
+
+  const selectTab = (name) => {
+      console.log(name)
+      active = name
+    }
 </script>
 
-<TabBar tabs={['live', 'explorer', 'trends']} let:tab bind:active>
-      <Tab {tab}>
-      <Label>{tab}</Label>
-    </Tab>
-</TabBar>
+<div class="bar">
+  <button on:click={() => selectTab('live')}>Live</button>
+  <button on:click={() => selectTab('explorer')}>Explorer</button>
+  <button on:click={() => selectTab('trends')}>Trends</button>
+</div>
 
-<style lang="scss">
-  .tab-bar {
-    display: flex;
-    flex-direction: row;
-    margin-bottom: 10px;
-  }
-
-  .tab {
-    width: 300px;
-    height: 35px;
-    padding-top: 10px;
-    background-color: white;
-    border: 1px solid black;
-    &.selected {
-      background-color: black;
-      color: white;
-    }
-  }
-</style>
+<style lang="scss"></style>

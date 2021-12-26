@@ -2,18 +2,32 @@
   import TrendChart from './TrendChart.svelte'
   import api from '../utils/api'
   import { onMount } from 'svelte'
-  let runs
+  import { DateTime } from "luxon";
+
+  let data
 
   onMount(async () => {
-      runs = await api.getRuns()
-      runs.sort((a, b) => b.startTime - a.startTime)
+      const runs = await api.getRuns()
+      runs.sort((a, b) => a.startTime - b.startTime)
+
+      const times = runs.map(r => new DateTime(r.startTime))
+      const weeks = {}
+      runs.forEach(r => {
+        const weekTime = DateTime.fromMillis(r.startTime).startOf('week')
+        const week = weeks[weekTime] || {distance: 0, calories: 0, time: 0, weekStart: weekTime}
+        week.distance += r.totalDistance
+        week.calories += r.totalCalories
+        week.time += r.totalTime
+        weeks[weekTime] = week
+      })
+      data = { runs, weeks }
   })
 
 </script>
 
 <main>
-  {#if runs}
-    <TrendChart data={runs} />
+  {#if data}
+    <TrendChart data={data} />
   {/if}
 </main>
 

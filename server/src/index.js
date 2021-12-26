@@ -10,14 +10,16 @@ const { processRun } = require('./processRun')
 const express = require('express')
 const cors = require('cors')
 
-const SPEED_SMOOTHING = 0
+const SPEED_SMOOTHING = 0.9
 const port = 3030
 const app = express()
+
+const rectStack = []
+let maxAreaRect = {area: 0}
 
 let fastestMile, fastestLap = null
 
 let wsInterval
-let speedDetails = {}
 
 app.use(cors())
 
@@ -111,6 +113,9 @@ function handleData(millis) {
   ticks.push(millis)
   lastTickTime = Date.now()
 
+  fastestMile = updateFastestDist(fastestMile, debouncedTicks, 1)
+  fastestLap = updateFastestDist(fastestLap, debouncedTicks, .25)
+
   let i = debouncedTicks.length - 1
   const windowBegin = i
   const lastTick = debouncedTicks[i]
@@ -124,11 +129,51 @@ function handleData(millis) {
   const elapsedTime = (debouncedTicks[windowBegin] - debouncedTicks[i] )
   const ticksPerMillis = tickCount/elapsedTime 
   const immediateSpeed = isNaN(ticksPerMillis) ? 0 : ticksPerMillis * MILLIS_PER_HOUR / TICKS_PER_MILE 
-  speed = immediateSpeed * (1-SPEED_SMOOTHING) + SPEED_SMOOTHING * speed
-  speedDetails = {
-    i, windowBegin, immediateSpeed, tickCount, elapsedTime, 
-    debouncedTicks: debouncedTicks.slice(i, windowBegin + 1)
+  speed = immediateSpeed * (1 - SPEED_SMOOTHING) + SPEED_SMOOTHING * speed
+  distance = debouncedTicks.length / TICKS_PER_MILE
+  time = (debouncedTicks[debouncedTicks.length - 1] - debouncedTicks[0])/1000
+
+  while (rectStack.length > 0  && rectStack[rectStack.length-1].height >= speed) {
+    const poppedBar = rectStack.pop()
+    const leftTime = rectStack.length === 0 ? -1 : rectStack[rectStack.length-1].time
+    const area = poppedBar.height * (time - leftTime)/3600
+    if (area > maxAreaRect.area) {
+      maxAreaRect = {
+        start: leftTime, 
+        end: time, 
+        height: poppedBar.height,
+        area
+      } 
+    } 
   }
+  if (i%30 == 0) {
+    const tmpStack = [...rectStack]
+    while (tmpStack.length > 0) {
+      const poppedBar = tmpStack.pop()
+      const leftTime = tmpStack.length === 0 ? -1 : tmpStack[tmpStack.length-1].time
+      const area = poppedBar.height * (time - leftTime)/3600
+      if (area > maxAreaRect.area) {
+        maxAreaRect = {
+          start: leftTime, 
+          end: time, 
+          height: poppedBar.height,
+          area
+        } 
+      } 
+    }
+  }
+
+
+  rectStack.push({time, height: speed})
+
+  runInfo.push({
+    distance,
+    time,
+    fastestMile,
+    fastestLap,
+    speed,
+    maxAreaRect
+  })
 }
 
 function endRun() {
@@ -166,15 +211,6 @@ function intervalHandler() {
 
 function wsHandler(ws) {
   if (state == 'running') {
-    fastestMile = updateFastestDist(fastestMile, debouncedTicks, 1)
-    fastestLap = updateFastestDist(fastestLap, debouncedTicks, .25)
-    runInfo.push({
-      distance: debouncedTicks.length / TICKS_PER_MILE,
-      time: (debouncedTicks[debouncedTicks.length - 1] - debouncedTicks[0])/1000,
-      fastestMile,
-      fastestLap,
-      speed
-    })
     ws.send(JSON.stringify({ 
       type: 'dataPoint',
       ...runInfo[runInfo.length - 1],

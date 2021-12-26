@@ -1,21 +1,9 @@
 <script lang="ts">
-  import TabBar from './components/TabBar.svelte'
-  import Explorer from './components/Explorer.svelte'
-  import Trends from './components/Trends.svelte'
   import Live from './components/Live.svelte'
-
-  let selectedTab = 'live'
 </script>
 
 <main>
-  <TabBar bind:active={selectedTab} />
-  {#if selectedTab === 'explorer'}
-    <Explorer />
-  {:else if selectedTab === 'trends'}
-    <Trends />
-  {:else if selectedTab === 'live'}
-    <Live />
-  {/if}
+  <Live />
 </main>
 
 <style lang="scss">

@@ -11,17 +11,20 @@
 
 <div class="ghost-container">
   <div class="ghost-speed">
-    <span>{ghostSpeed.toFixed(2)}</span> mph
+    <span>{ghostSpeed.toFixed(2)}</span> <span class="units"> mph</span>
   </div>
   <div>
-    {((ghostDistance - distance)*FEET_PER_MILE).toFixed(0)}
+    {((ghostDistance - distance)*FEET_PER_MILE).toFixed(0)}<span class="units"> ft</span>
   </div>
   <div>
-    {catchTime} s
+    {catchTime} <span class="units"> s</span>
   </div>
 </div>
 
 <style lang="scss">
+  .units {
+    font-size: 30px;
+  }
   .ghost-container {
     background-color: lightgrey;
     margin: 2px auto;
@@ -40,6 +43,9 @@
   .ghost-speed {
     & span {
       font-size: 80px;
+    }
+    .units {
+      font-size: 30px;
     }
   }
 </style>
