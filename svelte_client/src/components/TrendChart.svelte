@@ -8,7 +8,7 @@
 
   afterUpdate(() => {
       const width = chartDiv.offsetWidth - margin.left - margin.right
-      const height = 1000 - margin.top - margin.bottom
+      const height = 800 - margin.top - margin.bottom
       d3.select('#chart > *').remove()
       var svg = d3.select("#chart")
         .append("svg")

@@ -8,7 +8,6 @@
 </script>
 
 <div class="bar">
-  <button on:click={() => selectTab('live')}>Live</button>
   <button on:click={() => selectTab('explorer')}>Explorer</button>
   <button on:click={() => selectTab('trends')}>Trends</button>
 </div>
