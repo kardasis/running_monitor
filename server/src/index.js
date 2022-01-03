@@ -14,8 +14,6 @@ const SPEED_SMOOTHING = 0.9
 const port = 3030
 const app = express()
 
-const rectStack = []
-let maxAreaRect = {area: 0}
 
 let fastestMile, fastestLap = null
 
@@ -133,46 +131,12 @@ function handleData(millis) {
   distance = debouncedTicks.length / TICKS_PER_MILE
   time = (debouncedTicks[debouncedTicks.length - 1] - debouncedTicks[0])/1000
 
-  while (rectStack.length > 0  && rectStack[rectStack.length-1].height >= speed) {
-    const poppedBar = rectStack.pop()
-    const leftTime = rectStack.length === 0 ? -1 : rectStack[rectStack.length-1].time
-    const area = poppedBar.height * (time - leftTime)/3600
-    if (area > maxAreaRect.area) {
-      maxAreaRect = {
-        start: leftTime, 
-        end: time, 
-        height: poppedBar.height,
-        area
-      } 
-    } 
-  }
-  if (i%30 == 0) {
-    const tmpStack = [...rectStack]
-    while (tmpStack.length > 0) {
-      const poppedBar = tmpStack.pop()
-      const leftTime = tmpStack.length === 0 ? -1 : tmpStack[tmpStack.length-1].time
-      const area = poppedBar.height * (time - leftTime)/3600
-      if (area > maxAreaRect.area) {
-        maxAreaRect = {
-          start: leftTime, 
-          end: time, 
-          height: poppedBar.height,
-          area
-        } 
-      } 
-    }
-  }
-
-
-  rectStack.push({time, height: speed})
-
   runInfo.push({
     distance,
     time,
     fastestMile,
     fastestLap,
-    speed,
-    maxAreaRect
+    speed
   })
 }
 
