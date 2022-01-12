@@ -87,7 +87,7 @@ function handleData(millis) {
   ticks.push(millis)
   lastTickTime = Date.now()
 
-  fastestDistances = updateFastestDist(fastestDistances, debouncedTicks)
+  // fastestDistances = updateFastestDist(fastestDistances, debouncedTicks)
 
   let i = debouncedTicks.length - 1
   const windowBegin = i
@@ -159,7 +159,15 @@ function wsHandler(ws) {
 function updateFastestDist(fastestDistances, ticks) {
   const distances = [
     ['lap', .25],
-    ['mile', 1]
+    ['halfMile', .5],
+    ['oneMile', 1],
+    ['twoMiles', 2],
+    ['threeMiles', 3],
+    ['fourMiles', 4],
+    ['fiveMiles', 5],
+    ['oneKm', 0.621371],
+    ['fiveKm', 3.10686],
+    ['tenKm', 6.21371],
   ]
 
   for (let [name, distance] of distances) {
