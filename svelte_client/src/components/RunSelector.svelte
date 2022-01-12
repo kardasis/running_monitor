@@ -17,7 +17,7 @@
     })
 
   const refreshData = async () => {
-      await api.reproessAllRuns()
+      await api.reprocessAllRuns()
     }
 
   const runClickedHandler = (run) => {

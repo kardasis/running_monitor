@@ -50,11 +50,12 @@
         .attr('stroke', 'white')
         .attr('fill', '#69a3b2')
 
-      const bestMileAverageSpeed = 3600.0/(run.bestMile.mileTime)
+      const bestMile = run.bestDistances.oneMile
+      const bestMileAverageSpeed = 3600.0/(bestMile.time)
       svg.append('rect')
-        .attr('x', x(run.bestMile.left))
+        .attr('x', x(bestMile.left))
         .attr('y', y(bestMileAverageSpeed))
-        .attr('width', x(run.bestMile.right - run.bestMile.left))
+        .attr('width', x(bestMile.right - bestMile.left))
         .attr('height', y(0) - y(bestMileAverageSpeed))
         .attr('stroke', '888888')
         .attr('fill', '#44444488')

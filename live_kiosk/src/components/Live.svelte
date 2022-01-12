@@ -15,7 +15,6 @@
 
       connection.onmessage = (event) => {
           const data = JSON.parse(event.data);
-          console.log(data)
           if (data.type === "dataPoint") {
             if (state === 'standby') {
               state = 'running'

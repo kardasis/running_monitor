@@ -2,41 +2,17 @@ const {DEBOUNCE_TIME, TICKS_PER_MILE, MILLIS_PER_HOUR } = require('./constants')
 const keypress = require('keypress')
 const SerialPort= require('serialport')
 const WebSocket= require('ws')
-const {putToS3, fetchRuns, fetchRun} = require('./aws')
+const {putToS3} = require('./aws')
 const dotenv = require('dotenv')
 const { Faker } = require('./faker')
 
 const { processRun } = require('./processRun')
-const express = require('express')
-const cors = require('cors')
 
 const SPEED_SMOOTHING = 0.9
-const port = 3030
-const app = express()
 
-
-let fastestMile, fastestLap = null
+let fastestDistances = {}
 
 let wsInterval
-
-app.use(cors())
-
-app.get('/run/:name', async (req, res) => {
-  const rawRun = JSON.parse(await fetchRun(req.params.name))
-  res.json(processRun(rawRun))
-})
-
-app.get('/runs', async (req, res) => {
-  const runs = await fetchRuns()
-  res.json(runs.sort().map(r => {
-    return r.Key.split('.')[0]
-  }))
-})
-
-app.listen(port, () => {
-  console.log(`Express listening on port ${port}`)
-})
-
 
 dotenv.config()
 console.log(`starting app in environment: ${process.env.ENV}`)
@@ -111,8 +87,7 @@ function handleData(millis) {
   ticks.push(millis)
   lastTickTime = Date.now()
 
-  fastestMile = updateFastestDist(fastestMile, debouncedTicks, 1)
-  fastestLap = updateFastestDist(fastestLap, debouncedTicks, .25)
+  fastestDistances = updateFastestDist(fastestDistances, debouncedTicks)
 
   let i = debouncedTicks.length - 1
   const windowBegin = i
@@ -134,8 +109,7 @@ function handleData(millis) {
   runInfo.push({
     distance,
     time,
-    fastestMile,
-    fastestLap,
+    fastestDistances,
     speed
   })
 }
@@ -182,27 +156,38 @@ function wsHandler(ws) {
   }
 }
 
-function updateFastestDist(oldFastestMile, ticks, miles = 1) {
-  const ticks_per_dist = Math.floor(TICKS_PER_MILE * miles)
-  if (ticks.length <= ticks_per_dist) {
-    return null
-  }
-  if (!oldFastestMile) {
-    oldFastestMile = {
-      bestTime : ticks[ticks_per_dist] - ticks[0],
-      left: 0,
-    }
-  }
+function updateFastestDist(fastestDistances, ticks) {
+  const distances = [
+    ['lap', .25],
+    ['mile', 1]
+  ]
 
-  let bestTime = oldFastestMile.bestTime
-  let left = oldFastestMile.left
-  for (let i = oldFastestMile.left ; i < ticks.length - ticks_per_dist ; i++) {
-    if (ticks[ticks_per_dist + i] - ticks[i] < bestTime) {
-      bestTime = ticks[i + ticks_per_dist] - ticks[i] 
-      left = i
+  for (let [name, distance] of distances) {
+    const ticks_per_dist = Math.floor(TICKS_PER_MILE * distance)
+    if (ticks.length <= ticks_per_dist) {
+      break
+    }
+
+    if (!fastestDistances[name]) {
+      fastestDistances[name] = {
+        bestTime : ticks[ticks_per_dist] - ticks[0],
+        left: 0,
+      }
+    } else {
+      const oldFastest = fastestDistances[name]
+      let bestTime = oldFastest.bestTime
+      let left = oldFastest.left
+
+      for (let i = oldFastest.left ; i < ticks.length - ticks_per_dist ; i++) {
+        if (ticks[ticks_per_dist + i] - ticks[i] < bestTime) {
+          bestTime = ticks[i + ticks_per_dist] - ticks[i] 
+          left = i
+        }
+      }
+      fastestDistances[name] = { bestTime,  left }
     }
   }
-  return {bestTime, left }
+  return fastestDistances
 }
 
 const wss = new WebSocket.Server({ port: 8081 });

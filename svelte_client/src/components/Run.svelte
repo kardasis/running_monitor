@@ -1,13 +1,14 @@
 <script>
   import RunChart from './RunChart.svelte'
   import {durationString} from '../utils/time'
+  import api from '../utils/api'
 
   export let run = {}
   $: runDistance = run.data[run.data.length - 1].distance.toFixed(3)
   $: runDuration = durationString(run.data[run.data.length - 1].time)
   $: runSpeed = (runDistance/(run.data[run.data.length - 1].time) * 3600).toFixed(3) + ' mph'
-  $: fastestMileTime = durationString(run.bestMile.mileTime)
-  $: fastestMileSpeed = (3600.0/run.bestMile.mileTime).toFixed(2)
+  $: fastestMileTime = durationString(run.bestDistances.oneMile.time)
+  $: fastestMileSpeed = (3600.0/run.bestDistances.oneMile.time).toFixed(2)
   $: startTime = calculateDisplayTime(run.startTime)
   $: largestRect = `${(run.maxRectangle.area/3600).toFixed(2)}, ${durationString(run.maxRectangle.end - run.maxRectangle.start)} * ${run.maxRectangle.height.toFixed(2)}`
   $: calories = run.totalCalories?.toFixed(0)
@@ -16,12 +17,21 @@
       const res = new Date(0)
       res.setUTCSeconds(time/1000)
       return res.toDateString() + ' ' +  res.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-
     }
+
+  function deleteWithConfirm(run) {
+      if (confirm(`Are you sure you want to delete the run ${run.runId}`)) {
+          api.deleteRun(run.runId)
+        }
+    }
+
+
 </script>
 
 <div class="run-container">
   <h2 class="title">{startTime}</h2>
+  <button class="action-button" on:click={api.duplicateRun(run.runId)}>Duplicate</button>
+  <button class="action-button" on:click={deleteWithConfirm(run)}>Delete</button>
   <div class="metadata row">
     <div class="column">
       <div class="stat">
