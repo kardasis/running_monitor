@@ -7,6 +7,8 @@
   $: runDistance = run.data[run.data.length - 1].distance.toFixed(3)
   $: runDuration = durationString(run.data[run.data.length - 1].time)
   $: runSpeed = (runDistance/(run.data[run.data.length - 1].time) * 3600).toFixed(3) + ' mph'
+  $: fastestLapTime = durationString(run.bestDistances.lap.time)
+  $: fastestLapSpeed = (3600.0/run.bestDistances.lap.time).toFixed(2)
   $: fastestMileTime = durationString(run.bestDistances.oneMile.time)
   $: fastestMileSpeed = (3600.0/run.bestDistances.oneMile.time).toFixed(2)
   $: startTime = calculateDisplayTime(run.startTime)
@@ -45,6 +47,9 @@
       </div>
     </div>
     <div class="column">
+      <div class="stat">
+        <div class="label">Fastest Lap:</div><div class="data-content"> {fastestLapTime} / {fastestLapSpeed} mph </div>
+      </div>
       <div class="stat">
         <div class="label">Fastest Mile:</div><div class="data-content"> {fastestMileTime} / {fastestMileSpeed} mph </div>
       </div>
