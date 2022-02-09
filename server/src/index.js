@@ -59,8 +59,8 @@ if (process.env.ENV == 'DEVELOPMENT') {
 SerialPort.list().then((list) => {
   let port
   let parser
-  if (list.some(portInfo => portInfo.path.includes('ttyUSB0'))) {
-    port = new SerialPort('/dev/ttyUSB0', { baudRate: 9600 })
+  if (list.some(portInfo => portInfo.path.includes('ttyACM0'))) {
+    port = new SerialPort('/dev/ttyACM0', { baudRate: 9600 })
     port.on("open", () => {
       console.log('connected to arduino')
     })
